@@ -1,7 +1,10 @@
 package com.emmanuel.biblioteca.entity;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 
 import java.util.List;
 
@@ -12,23 +15,29 @@ public class Libro {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @NotBlank(message = "El título no puede estar vacío")
+    @Size(min = 2, max = 200, message = "El título debe tener entre 2 y 200 caracteres")
     @Column(nullable = false)
     private String titulo;
 
+    @NotBlank(message = "El género no puede estar vacío")
+    @Size(min = 2, max = 100, message = "El género debe tener entre 2 y 100 caracteres")
     @Column(nullable = false)
     private String genero;
 
+    @NotBlank(message = "El código único no puede estar vacío")
+    @Size(min = 5, max = 50, message = "El código único debe tener entre 5 y 50 caracteres")
+    @Pattern(regexp = "^[a-zA-Z0-9\\-]+$", message = "El código único solo puede contener letras, números y guiones")
     @Column(name = "codigo_unico", unique = true, nullable = false)
     private String codigoUnico;
 
     @ManyToOne
     @JoinColumn(name = "autor_id", nullable = false)
-    @JsonBackReference // Evita la recursión infinita al serializar
     private Autor autor;
 
     @OneToMany(mappedBy = "libro", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("libro-copiaLibro")
-    List<CopiaLibro> copiaLibros;
+    @JsonIgnore
+    private List<CopiaLibro> copiaLibros;
 
     @OneToMany(mappedBy = "libro", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference("libro-resena")
@@ -43,44 +52,12 @@ public class Libro {
         this.autor = autor;
     }
 
-    public List<Resena> getResenas() {
-        return resenas;
+    public Integer getId() {
+        return id;
     }
 
-    public void setResenas(List<Resena> resenas) {
-        this.resenas = resenas;
-    }
-
-    public List<CopiaLibro> getCopiaLibros() {
-        return copiaLibros;
-    }
-
-    public void setCopiaLibros(List<CopiaLibro> copiaLibros) {
-        this.copiaLibros = copiaLibros;
-    }
-
-    public Autor getAutor() {
-        return autor;
-    }
-
-    public void setAutor(Autor autor) {
-        this.autor = autor;
-    }
-
-    public String getCodigoUnico() {
-        return codigoUnico;
-    }
-
-    public void setCodigoUnico(String codigoUnico) {
-        this.codigoUnico = codigoUnico;
-    }
-
-    public String getGenero() {
-        return genero;
-    }
-
-    public void setGenero(String genero) {
-        this.genero = genero;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getTitulo() {
@@ -91,12 +68,44 @@ public class Libro {
         this.titulo = titulo;
     }
 
-    public Integer getId() {
-        return id;
+    public String getGenero() {
+        return genero;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setGenero(String genero) {
+        this.genero = genero;
+    }
+
+    public String getCodigoUnico() {
+        return codigoUnico;
+    }
+
+    public void setCodigoUnico(String codigoUnico) {
+        this.codigoUnico = codigoUnico;
+    }
+
+    public Autor getAutor() {
+        return autor;
+    }
+
+    public void setAutor(Autor autor) {
+        this.autor = autor;
+    }
+
+    public List<CopiaLibro> getCopiaLibros() {
+        return copiaLibros;
+    }
+
+    public void setCopiaLibros(List<CopiaLibro> copiaLibros) {
+        this.copiaLibros = copiaLibros;
+    }
+
+    public List<Resena> getResenas() {
+        return resenas;
+    }
+
+    public void setResenas(List<Resena> resenas) {
+        this.resenas = resenas;
     }
 
     @Override

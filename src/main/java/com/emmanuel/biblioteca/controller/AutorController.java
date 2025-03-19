@@ -4,6 +4,8 @@ import com.emmanuel.biblioteca.entity.Autor;
 import com.emmanuel.biblioteca.entity.Libro;
 import com.emmanuel.biblioteca.service.AutorService;
 import com.emmanuel.biblioteca.service.LibroService;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(path = "api/v1/autores")
+@Tag(name = "Autores", description = "Gestión de autores y sus libros")
 public class AutorController {
 
     private final AutorService autorService;
@@ -39,7 +42,7 @@ public class AutorController {
 
     // Crear o actualizar un autor (201 Created)
     @PostMapping
-    public ResponseEntity<Autor> saveUpdate(@RequestBody Autor autor) {
+    public ResponseEntity<Autor> saveUpdate(@Valid @RequestBody Autor autor) {
         Autor savedAutor = autorService.saveOrUpdate(autor);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedAutor);
     }
@@ -64,16 +67,13 @@ public class AutorController {
             @PathVariable("autorId") Integer autorId,
             @PathVariable("libroId") Integer libroId) {
         Libro libro = libroService.getLibroAutorById(libroId, autorId);
-        if (libro == null) {
-            throw new RuntimeException("Libro con ID " + libroId + " no encontrado para el autor " + autorId);
-        }
         return ResponseEntity.ok(libro);
     }
 
     @PostMapping("/{autorId}/libros")
     public ResponseEntity<Libro> saveOrUpdateLibro(
             @PathVariable Integer autorId,
-            @RequestBody Libro libro) {
+            @Valid @RequestBody Libro libro) {
         Libro savedLibro = libroService.saveOrUpdateLibro(autorId, libro);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedLibro);
     }

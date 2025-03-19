@@ -1,9 +1,8 @@
 package com.emmanuel.biblioteca.entity;
 
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-
+import jakarta.validation.constraints.*;
 
 @Entity
 public class Resena {
@@ -12,18 +11,24 @@ public class Resena {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @NotNull(message = "El usuario no puede ser nulo")
     @ManyToOne
-    @JoinColumn(name = "usuario_id")
+    @JoinColumn(name = "usuario_id", nullable = false)
     @JsonBackReference("usuario-resena")
     private Usuario usuario;
 
+    @NotNull(message = "El libro no puede ser nulo")
     @ManyToOne
     @JoinColumn(name = "libro_id", nullable = false)
     @JsonBackReference("libro-resena")
     private Libro libro;
 
+    @NotNull(message = "La calificación no puede ser nula")
+    @Min(value = 1, message = "La calificación mínima es 1")
+    @Max(value = 5, message = "La calificación máxima es 5")
     private Integer calificacion;
 
+    @Size(max = 500, message = "El comentario no puede superar los 500 caracteres")
     private String comentario;
 
     public Resena() {}

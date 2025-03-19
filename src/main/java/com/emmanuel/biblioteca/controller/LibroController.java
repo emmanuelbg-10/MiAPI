@@ -4,13 +4,14 @@ import com.emmanuel.biblioteca.entity.Libro;
 import com.emmanuel.biblioteca.entity.Resena;
 import com.emmanuel.biblioteca.service.LibroService;
 import com.emmanuel.biblioteca.service.ResenaService;
-import org.springframework.http.HttpStatus;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
 @RequestMapping(path = "api/v1/libros")
+@Tag(name = "Libro", description = "Gestión de libro")
 public class LibroController {
     private final LibroService libroService;
     private final ResenaService resenaService;
@@ -22,36 +23,23 @@ public class LibroController {
 
     @GetMapping
     public ResponseEntity<List<Libro>> getAll() {
-        List<Libro> libros = libroService.getLibros();
-        return ResponseEntity.ok(libros);
+        return ResponseEntity.ok(libroService.getLibros());
     }
 
     @GetMapping("/{libroId}")
     public ResponseEntity<Libro> getById(@PathVariable("libroId") Integer libroId) {
-        try {
-            Libro libro = libroService.getLibroById(libroId).orElseThrow(() ->
-                    new RuntimeException("Libro con ID " + libroId + " no encontrado"));
-            return ResponseEntity.ok(libro);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
+        return ResponseEntity.ok(libroService.getLibroById(libroId));
     }
 
     @GetMapping("/{libroId}/resenas")
     public ResponseEntity<List<Resena>> getResenasByLibro(@PathVariable("libroId") Integer libroId) {
-        List<Resena> resenas = resenaService.getResenasByLibro(libroId);
-        return ResponseEntity.ok(resenas);
+        return ResponseEntity.ok(resenaService.getResenasByLibro(libroId));
     }
 
     @GetMapping("/{libroId}/resenas/{resenaId}")
     public ResponseEntity<Resena> getByIdLibroResena(
             @PathVariable("libroId") Integer libroId,
             @PathVariable("resenaId") Integer resenaId) {
-        try {
-            Resena resena = resenaService.getResenaLibroById(resenaId, libroId);
-            return ResponseEntity.ok(resena);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
+        return ResponseEntity.ok(resenaService.getResenaLibroById(resenaId, libroId));
     }
 }

@@ -1,7 +1,8 @@
 package com.emmanuel.biblioteca.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 
 import java.util.List;
 
@@ -12,21 +13,26 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false)
+    @NotBlank(message = "El nombre no puede estar vacío")
+    @Size(min = 2, max = 100, message = "El nombre debe tener entre 2 y 100 caracteres")
+    @Column(name = "nombre", nullable = false)
     private String nombre;
 
+    @NotNull(message = "El correo no puede ser nulo")
+    @Email(message = "Debe proporcionar un correo electrónico válido")
     @Column(unique = true, nullable = false)
     private String correo;
 
+    @Digits(integer = 9, fraction = 0, message = "El teléfono debe contener hasta 9 dígitos")
     @Column(unique = true, nullable = false)
     private Long telefono;
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("usuario-resena")
+    @JsonIgnore
     private List<Resena> resenas;
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("usuario-prestamos")
+    @JsonIgnore
     private List<Prestamo> prestamos;
 
     public Usuario() {}

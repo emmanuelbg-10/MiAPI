@@ -1,8 +1,8 @@
 package com.emmanuel.biblioteca.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
@@ -15,7 +15,6 @@ public class CopiaLibro {
 
     @ManyToOne
     @JoinColumn(name = "libro_id", nullable = false)
-    @JsonBackReference("libro-copiaLibro")
     private Libro libro;
 
     @OneToMany(mappedBy = "copiaLibro", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -23,7 +22,7 @@ public class CopiaLibro {
     private List<Prestamo> prestamos;
 
     @Column(nullable = false)
-    private boolean prestado = false; // 🔹 Indica si la copia está prestada
+    private boolean disponible = true; // 🔹 Indica si la copia está prestada
 
     public CopiaLibro() {}
 
@@ -31,12 +30,12 @@ public class CopiaLibro {
         this.libro = libro;
     }
 
-    public boolean isPrestado() {
-        return prestado;
+    public @NotNull(message = "El estado de préstamo no puede ser nulo") boolean isDisponible() {
+        return disponible;
     }
 
-    public void setPrestado(boolean prestado) {
-        this.prestado = prestado;
+    public void setDisponible(@NotNull(message = "El estado de préstamo no puede ser nulo") boolean disponible) {
+        this.disponible = disponible;
     }
 
     public Integer getId() {
@@ -69,6 +68,7 @@ public class CopiaLibro {
                 "id=" + id +
                 ", libro=" + libro +
                 ", prestamos=" + prestamos +
+                ", disponible=" + disponible +
                 '}';
     }
 }

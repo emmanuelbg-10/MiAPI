@@ -1,16 +1,15 @@
 package com.emmanuel.biblioteca.controller;
 
 import com.emmanuel.biblioteca.entity.Resena;
-import com.emmanuel.biblioteca.exception.ErrorResponse;
 import com.emmanuel.biblioteca.service.ResenaService;
-import org.springframework.http.HttpStatus;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
 @RequestMapping(path = "api/v1/resenas")
+@Tag(name = "Resena", description = "Gestión de resena")
 public class ResenaController {
 
     private final ResenaService resenaService;
@@ -21,20 +20,11 @@ public class ResenaController {
 
     @GetMapping
     public ResponseEntity<List<Resena>> getAll() {
-        List<Resena> resenas = resenaService.getResenas();
-        return ResponseEntity.ok(resenas);
+        return ResponseEntity.ok(resenaService.getResenas());
     }
 
     @GetMapping("/{resenaId}")
-    public ResponseEntity<?> getById(@PathVariable("resenaId") Integer resenaId) {
-        try {
-            Resena resena = resenaService.getResenaById(resenaId);
-            return ResponseEntity.ok(resena);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    new ErrorResponse(HttpStatus.NOT_FOUND.value(), "Not Found",
-                            "Reseña con ID " + resenaId + " no encontrada", "/api/v1/resenas/" + resenaId)
-            );
-        }
+    public ResponseEntity<Resena> getById(@PathVariable("resenaId") Integer resenaId) {
+        return ResponseEntity.ok(resenaService.getResenaById(resenaId));
     }
 }

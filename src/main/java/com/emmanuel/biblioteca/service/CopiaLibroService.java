@@ -17,7 +17,7 @@ public class CopiaLibroService {
         this.libroRepository = libroRepository;
     }
 
-    public List<CopiaLibro> getCopiaLibros(){
+    public List<CopiaLibro> getCopiaLibros() {
         return copiaLibroRepository.findAll();
     }
 
@@ -31,11 +31,25 @@ public class CopiaLibroService {
         copiaLibroRepository.delete(copiaLibro);
     }
 
-    public CopiaLibro createCopiaLibro(Integer libroId) {
+    public CopiaLibro saveOrUpdateCopiaLibro(Integer libroId) {
         Libro libro = libroRepository.findById(libroId)
                 .orElseThrow(() -> new RuntimeException("Libro no encontrado con ID: " + libroId));
 
-        CopiaLibro nuevaCopia = new CopiaLibro(libro);
+        CopiaLibro nuevaCopia = new CopiaLibro(libro); // Siempre se crea una nueva copia
         return copiaLibroRepository.save(nuevaCopia);
+    }
+
+    public List<CopiaLibro> getLibrosDisponibles() {
+        try {
+            List<CopiaLibro> disponibles = copiaLibroRepository.findLibrosDisponibles();
+
+            if (disponibles.isEmpty()) {
+                throw new RuntimeException("No hay libros disponibles en este momento");
+            }
+
+            return disponibles;
+        } catch (Exception e) {
+            throw new RuntimeException("Error al obtener libros disponibles: " + e.getMessage());
+        }
     }
 }

@@ -1,12 +1,13 @@
 package com.emmanuel.biblioteca.service;
 
-import com.emmanuel.biblioteca.entity.Resena;
 import com.emmanuel.biblioteca.entity.Usuario;
 import com.emmanuel.biblioteca.repository.UsuarioRepository;
+import jakarta.transaction.Transactional;
+import org.hibernate.Hibernate;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UsuarioService {
@@ -17,27 +18,42 @@ public class UsuarioService {
         this.usuarioRepository = usuarioRepository;
     }
 
-    public List<Usuario> getUsuarios(){
-        return usuarioRepository.findAll();
+    public List<Usuario> getUsuarios() {
+        try {
+            return usuarioRepository.findAll();
+        } catch (DataAccessException e) {
+            throw new RuntimeException("Error al obtener la lista de usuarios", e);
+        }
     }
 
-    public Usuario getUsuarioById(Integer id){
-        return usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("No se encontró al usuario con ID "+ id));
+    @Transactional
+    public Usuario getUsuarioById(Integer usuarioId) {
+        try {
+            Usuario usuario = usuarioRepository.findById(usuarioId)
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + usuarioId));
+            Hibernate.initialize(usuario.getResenas());  // Cargar lista de reseñas
+            Hibernate.initialize(usuario.getPrestamos()); // Cargar lista de préstamos
+            return usuario;
+        } catch (DataAccessException e) {
+            throw new RuntimeException("Error al obtener el usuario con ID: " + usuarioId, e);
+        }
     }
 
-    public Usuario saveOrUpdate(Usuario usuario){
-        usuarioRepository.save(usuario);
-        return usuario;
+    public Usuario saveOrUpdate(Usuario usuario) {
+        try {
+            return usuarioRepository.save(usuario);
+        } catch (DataAccessException e) {
+            throw new RuntimeException("Error al guardar o actualizar el usuario", e);
+        }
     }
 
-    public void deleteUsuarioById(Integer usuarioId){
-        Optional<Usuario> usuario = usuarioRepository.findById(usuarioId);
-
-        if(usuario.isPresent()){
-            usuarioRepository.deleteById(usuarioId);
-        } else {
-            throw new RuntimeException("El usuario con ID"+ usuarioId+" no existe.");
+    public void deleteUsuarioById(Integer usuarioId) {
+        try {
+            Usuario usuario = usuarioRepository.findById(usuarioId)
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + usuarioId));
+            usuarioRepository.delete(usuario);
+        } catch (DataAccessException e) {
+            throw new RuntimeException("Error al eliminar el usuario con ID: " + usuarioId, e);
         }
     }
 }

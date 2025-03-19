@@ -1,16 +1,15 @@
 package com.emmanuel.biblioteca.controller;
 
 import com.emmanuel.biblioteca.entity.Prestamo;
-import com.emmanuel.biblioteca.exception.ErrorResponse;
 import com.emmanuel.biblioteca.service.PrestamoService;
-import org.springframework.http.HttpStatus;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
 @RequestMapping(path = "api/v1/prestamos")
+@Tag(name = "Prestamos", description = "Gestión de prestamos")
 public class PrestamoController {
 
     private final PrestamoService prestamoService;
@@ -21,19 +20,24 @@ public class PrestamoController {
 
     @GetMapping
     public ResponseEntity<List<Prestamo>> getAll() {
-        List<Prestamo> prestamos = prestamoService.getPrestamos();
-        return ResponseEntity.ok(prestamos);
+        return ResponseEntity.ok(prestamoService.getPrestamos());
     }
 
     @GetMapping("/{prestamoId}")
-    public ResponseEntity<?> getById(@PathVariable("prestamoId") Integer prestamoId) {
-        try {
-            Prestamo prestamo = prestamoService.getPrestamoById(prestamoId);
-            return ResponseEntity.ok(prestamo);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    new ErrorResponse(HttpStatus.NOT_FOUND.value(), "Not Found",
-                            "Préstamo con ID " + prestamoId + " no encontrado", "/api/v1/prestamos/" + prestamoId));
-        }
+    public ResponseEntity<Prestamo> getById(@PathVariable("prestamoId") Integer prestamoId) {
+        return ResponseEntity.ok(prestamoService.getPrestamoById(prestamoId));
     }
+
+    @GetMapping("/top-usuarios")
+    public ResponseEntity<List<Object[]>> getUsuariosConMasPrestamosUltimoAnio(
+            @RequestParam(required = false) Integer maxResultados) {
+
+        if (maxResultados == null) {
+            maxResultados = prestamoService.getTotalUsuariosConPrestamosUltimoAnio(); // Calcula automáticamente
+        }
+
+        List<Object[]> resultado = prestamoService.getUsuariosConMasPrestamosUltimoAnio(maxResultados);
+        return ResponseEntity.ok(resultado);
+    }
+
 }

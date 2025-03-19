@@ -1,6 +1,12 @@
 package com.emmanuel.biblioteca.entity;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+
 import java.time.LocalDate;
 
 @Entity
@@ -10,32 +16,52 @@ public class Prestamo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @NotNull(message = "El usuario no puede ser nulo")
     @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
-    @JsonBackReference("usuario-prestamos")
+    @JsonBackReference("usuario-prestamo")
     private Usuario usuario;
 
+    @NotNull(message = "La copia del libro no puede ser nula")
     @ManyToOne
     @JoinColumn(name = "copia_libro_id", nullable = false)
     @JsonBackReference("copiaLibro-prestamos")
     private CopiaLibro copiaLibro;
 
+    @NotNull(message = "La fecha de inicio no puede ser nula")
+    @FutureOrPresent(message = "La fecha de inicio debe ser hoy o en el futuro")
     @Column(name = "fecha_inicio", nullable = false)
     private LocalDate fechaInicio;
 
+    @NotNull(message = "La fecha de vencimiento no puede ser nula")
+    @Future(message = "La fecha de vencimiento debe estar en el futuro")
     @Column(name = "fecha_vencimiento", nullable = false)
     private LocalDate fechaVencimiento;
 
-    @Column(name = "fecha_devolucion")
+    @PastOrPresent(message = "La fecha de devolución debe ser hoy o en el pasado")
+    @Column(name = "fecha_devolucion", nullable = true)
     private LocalDate fechaDevolucion;
+
+    @Column(nullable = false)
+    private boolean devuelto = false; // Por defecto, el préstamo no está devuelto
+
+    public boolean isDevuelto() {
+        return devuelto;
+    }
+
+    public void setDevuelto(boolean devuelto) {
+        this.devuelto = devuelto;
+    }
 
     public Prestamo() {}
 
-    public Prestamo(Usuario usuario, CopiaLibro copiaLibro, LocalDate fechaInicio, LocalDate fechaVencimiento) {
+    public Prestamo(Usuario usuario, CopiaLibro copiaLibro, LocalDate fechaInicio, LocalDate fechaVencimiento, LocalDate fechaDevolucion, boolean devuelto) {
         this.usuario = usuario;
         this.copiaLibro = copiaLibro;
         this.fechaInicio = fechaInicio;
         this.fechaVencimiento = fechaVencimiento;
+        this.fechaDevolucion = fechaDevolucion != null ? fechaDevolucion : null;
+        this.devuelto = devuelto;
     }
 
     public Integer getId() {
@@ -95,6 +121,7 @@ public class Prestamo {
                 ", fechaInicio=" + fechaInicio +
                 ", fechaVencimiento=" + fechaVencimiento +
                 ", fechaDevolucion=" + fechaDevolucion +
+                ", devuelto=" + devuelto +
                 '}';
     }
 }

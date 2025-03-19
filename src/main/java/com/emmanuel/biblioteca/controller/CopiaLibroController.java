@@ -1,16 +1,16 @@
 package com.emmanuel.biblioteca.controller;
 
 import com.emmanuel.biblioteca.entity.CopiaLibro;
-import com.emmanuel.biblioteca.exception.ErrorResponse;
 import com.emmanuel.biblioteca.service.CopiaLibroService;
-import org.springframework.http.HttpStatus;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "api/v1/copiaLibros")
+@RequestMapping("api/v1/copiaLibros")
+@Tag(name = "CopiaLibros", description = "Gestión de copias de libros")
 public class CopiaLibroController {
 
     private final CopiaLibroService copiaLibroService;
@@ -21,43 +21,30 @@ public class CopiaLibroController {
 
     @GetMapping
     public ResponseEntity<List<CopiaLibro>> getAll() {
-        List<CopiaLibro> copiaLibros = copiaLibroService.getCopiaLibros();
-        return ResponseEntity.ok(copiaLibros);
+        return ResponseEntity.ok(copiaLibroService.getCopiaLibros());
     }
 
     @GetMapping("/{libroId}")
-    public ResponseEntity<?> getById(@PathVariable("libroId") Integer libroId) {
-        try {
-            CopiaLibro copiaLibro = copiaLibroService.getCopiaLibroById(libroId);
-            return ResponseEntity.ok(copiaLibro);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    new ErrorResponse(HttpStatus.NOT_FOUND.value(), "Not Found",
-                            "Copia de libro con ID " + libroId + " no encontrada", "/api/v1/copiaLibros/" + libroId));
-        }
+    public ResponseEntity<CopiaLibro> getById(@PathVariable("libroId") Integer libroId) {
+        return ResponseEntity.ok(copiaLibroService.getCopiaLibroById(libroId));
     }
 
     @PostMapping("/{libroId}")
-    public ResponseEntity<?> saveUpdate(@PathVariable Integer libroId) {
-        try {
-            CopiaLibro copiaLibro = copiaLibroService.createCopiaLibro(libroId);
-            return ResponseEntity.status(HttpStatus.CREATED).body(copiaLibro);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    new ErrorResponse(HttpStatus.NOT_FOUND.value(), "Not Found",
-                            e.getMessage(), "/api/v1/copiaLibros/" + libroId));
-        }
+    public ResponseEntity<CopiaLibro> saveOrUpdate(@PathVariable Integer libroId) {
+        CopiaLibro savedCopia = copiaLibroService.saveOrUpdateCopiaLibro(libroId);
+        return ResponseEntity.ok(savedCopia);
     }
 
+
     @DeleteMapping("/{copiaLibroId}")
-    public ResponseEntity<?> deleteLibro(@PathVariable("copiaLibroId") Integer copiaLibroId) {
-        try {
-            copiaLibroService.deleteCopiaLibroById(copiaLibroId);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    new ErrorResponse(HttpStatus.NOT_FOUND.value(), "Not Found",
-                            "Copia de libro con ID " + copiaLibroId + " no encontrada", "/api/v1/copiaLibros/" + copiaLibroId));
-        }
+    public ResponseEntity<Void> deleteLibro(@PathVariable("copiaLibroId") Integer copiaLibroId) {
+        copiaLibroService.deleteCopiaLibroById(copiaLibroId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/disponibles")
+    public ResponseEntity<List<CopiaLibro>> getLibrosDisponibles() {
+        List<CopiaLibro> disponibles = copiaLibroService.getLibrosDisponibles();
+        return ResponseEntity.ok(disponibles);
     }
 }

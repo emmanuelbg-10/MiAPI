@@ -6,7 +6,6 @@ import com.emmanuel.biblioteca.repository.AutorRepository;
 import com.emmanuel.biblioteca.repository.LibroRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class LibroService {
@@ -18,21 +17,17 @@ public class LibroService {
         this.autorRepository = autorRepository;
     }
 
-    public List<Libro> getLibros(){
+    public List<Libro> getLibros() {
         return libroRepository.findAll();
     }
 
-    public Optional<Libro> getLibroById(Integer id){
-        return libroRepository.findById(id);
+    public Libro getLibroById(Integer id) {
+        return libroRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Libro con ID " + id + " no encontrado"));
     }
-
-
-
-
 
     public List<Libro> getLibrosByAutor(Integer autorId) {
         List<Libro> libros = libroRepository.findByAutorId(autorId);
-
         if (libros.isEmpty()) {
             throw new RuntimeException("No hay libros para el autor con ID " + autorId);
         }
@@ -44,28 +39,23 @@ public class LibroService {
                 .orElseThrow(() -> new RuntimeException("No hay un libro con ID " + libroId + " para este autor"));
     }
 
-
     public Libro saveOrUpdateLibro(Integer autorId, Libro libro) {
         Autor autor = autorRepository.findById(autorId)
                 .orElseThrow(() -> new RuntimeException("Autor con ID " + autorId + " no encontrado"));
 
-        libro.setAutor(autor); // Asocia el libro al autor
-        return libroRepository.save(libro); // JPA maneja tanto inserción como actualización
+        libro.setAutor(autor);
+        return libroRepository.save(libro);
     }
 
     public void deleteLibro(Integer libroId, Integer autorId) {
-        // Verifica si el autor existe
         if (!autorRepository.existsById(autorId)) {
             throw new RuntimeException("Autor con ID " + autorId + " no encontrado");
         }
 
-        // Busca el libro asegurando que pertenece al autor
         Libro libro = libroRepository.findByIdAndAutorId(libroId, autorId)
                 .orElseThrow(() -> new RuntimeException(
                         "El libro con ID " + libroId + " no existe o no pertenece al autor con ID " + autorId));
 
-        // Elimina el libro
         libroRepository.delete(libro);
     }
-
 }
